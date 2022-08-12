@@ -1,0 +1,31 @@
+{% load static %}
+<div class="modal-back" id="request-modal-back" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-window-request">
+            <div class="modal-header" style="margin-top: 20px;">Создание заявки</div>
+            <form method="post" class="modal-form-request" action="{% url 'withdraw' %}">
+                {% csrf_token %}
+                <input class="modal-form-input" type="number" name="amount" value="" placeholder="Сумма" required min="{{ min_sum }}" max="99999999">
+                <textarea class="modal-form-input" name="comment" cols="30" rows="10" placeholder="Реквизиты"></textarea>
+                {% if error %}
+                    <p class="main-text" style="margin-top: 5px;">{{ error }}</p>
+                {% endif %}
+                <input class="green-button" type="submit" value="Создать заявку">
+            </form>
+        </div>
+        <div class="modal-close desktop-div" onclick="close_modal_request();">
+            <img src="{% static 'img/close_button.png' %}" alt="Закрыть" width="28">
+        </div>
+    </div>
+</div>
+
+<!-- open and close modal script -->
+<script>
+    function open_modal_request() {
+        document.querySelector('#request-modal-back').style.display = 'flex';
+    }
+
+    function close_modal_request() {
+        document.querySelector('#request-modal-back').style.display = 'none';
+    }
+</script>

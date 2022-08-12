@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block page_name %}
+    <div id="page_name" style="display: none;">Вывод средств</div>
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+    <div class="items-row stats-search row-space-between">
+        <div class="pl-header-texts">
+            <h1>История запросов</h1>
+            <p class="pl-header-light-text">Последние запросы</p>
+        </div>
+        <div class="blue-button" onclick="open_modal_request();">Создать запрос</div>
+    </div>
+    {% if withdraw_list %}
+    <div class="requests-table">
+        <table>
+            <tr>
+                <th>№</th>
+                <th>Дата запроса</th>
+                <th>Сумма</th>
+                <th>Реквизиты</th>
+                <th>Причина отклонения</th>
+            </tr>
+            {% for withdraw in withdraw_list %}
+            <tr class="requests-row">
+                <td>
+                    <div class="label-number">
+                        <div class="{{ withdraw.1 }}-circle"></div>
+                        <div>{{ withdraw.5 }}</div>
+                    </div>
+                </td>
+                <td>{{ withdraw.3 }}</td>
+                <td>{{ withdraw.0 }}</td>
+                <td>{{ withdraw.4 }}</td>
+                <td>{{ withdraw.2 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div class="void-requests-table">
+        <p>Здесь будет Ваша история запросов</p>
+    </div>
+    {% endif %}
+
+    {% include "user/request_modal.html" %}
+
+    {% if error %}
+        <script>
+            window.onload = open_modal_request;
+        </script>
+    {% endif %}
+
+{% endblock %}

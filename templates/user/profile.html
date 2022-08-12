@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block page_name %}
+    <div id="page_name" style="display: none;">Профиль</div>
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+    {% if no_token %}
+        {% include 'user/red_error_table.html' %}
+    {% endif %}
+    <div class="items-row stats-search row-space-between">
+        <h1>Статистика</h1>
+        <div class="search">
+            <img src="{% static 'img/search_icon.png' %}" alt="Поиск">
+            <input type="search" autocomplete="off" value="" placeholder="Поиск" id="search-input" oninput="searchTrigger();">
+        </div>
+    </div>
+    <div class="items-row stats-blocks desktop-div">
+        <div class="white-block">
+            <div class="left-block-part">
+                <img src="{% static 'img/ruble_ico.png' %}" alt="">
+            </div>
+            <div class="right-block-part">
+                <p class="bold-text block-part-header">{{ balance_amount }}</p>
+                <p class="main-text">Ваш баланс баллов</p>
+                <p class="light-text">{{ rate }} балл = 1 ₽</p>
+            </div>
+        </div>
+        <div class="white-block">
+            <div class="left-block-part">
+                <img src="{% static 'img/music_ico.png' %}" alt="">
+            </div>
+            <div class="right-block-part">
+                <p class="bold-text block-part-header">{{ playlists_number }} шт</p>
+                <p class="main-text">Количество добавленных плейлистов</p>
+            </div>
+        </div>
+        <div class="white-block">
+            <div class="left-block-part">
+                <img src="{% static 'img/clock_ico.png' %}" alt="">
+            </div>
+            <div class="right-block-part">
+                <p class="bold-text block-part-header">{{ auditions_sum_for_day }} раз</p>
+                <p class="main-text">Количество прослушиваний за сутки</p>
+            </div>
+        </div>
+        <div class="white-block">
+            <div class="left-block-part">
+                <img src="{% static 'img/heart_ico.png' %}" alt="">
+            </div>
+            <div class="right-block-part">
+                <p class="bold-text block-part-header">{{ possible_sum }} баллов</p>
+                <p class="main-text">Возможный заработок за неделю</p>
+            </div>
+        </div>
+    </div>
+    <div class="items-row stats-blocks mobile-div">
+        <div class="mobile-white-block">
+            <img src="{% static 'img/ruble_ico.png' %}" alt="">
+            <p class="bold-text">{{ balance_amount }}</p>
+            <p class="main-text">Ваш баланс баллов</p>
+            <p class="light-text">{{ rate }} балл = 1 ₽</p>
+        </div>
+        <div class="mobile-white-block">
+            <img src="{% static 'img/clock_ico.png' %}" alt="">
+            <p class="bold-text">{{ auditions_sum_for_day }} раз</p>
+            <p class="main-text">Прослушивания за сутки</p>
+        </div>
+    </div>
+    <div class="items-row stat-table-header">
+        <h1>Статистика треков</h1>
+        <p class="large-text open-full-table" onclick="show_full_stats(this);">Смотреть всё</p>
+    </div>
+    {% if audios_top %}
+    <div class="stat-table">
+        <table>
+            <tr>
+                <th>№</th>
+                <th>Название песни</th>
+                <th>Название плейлиста</th>
+                <th>Позиция в плейлисте</th>
+                <th>Слушали</th>
+                <th>Дата добавления</th>
+            </tr>
+            {% for audio in audios_top %}
+            <tr>
+                <td>{{ audio.1.0 }}</td>
+                <td>
+                    <div class="song-name">
+                        <div class="song-name-part">
+                            <img src="{{ audio.0.logo_url }}" alt="">
+                        </div>
+                        <div class="song-name-part">
+                            <p class="song-name-title">{{ audio.0.title }}</p>
+                            <p class="song-name-author">{{ audio.0.artist }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="playlist-author">{{ audio.0.playlist.name }}</td>
+                <td>{{ audio.1.2 }}</td>
+                <td>{{ audio.1.1 }}</td>
+                <td>{{ audio.0.added_at }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {% else %}
+    <div class="void-stat-table">
+        <p>Здесь будет Ваша статистика по трекам</p>
+        <div><a onclick="open_modal();">Как привязать страницу?</a></div>
+    </div>
+    {% endif %}
+
+    <!-- Search script -->
+    <script>
+        function searchTrigger() {
+            let searchInput = document.getElementById('search-input');
+            let value = searchInput.value;
+            let audios = document.getElementsByClassName('stat-table')[0].getElementsByTagName('tr');
+            for(let i = 1; i < audios.length; i++) {
+                let audio = audios[i];
+                let audioName = audio.getElementsByClassName('song-name-title')[0].innerHTML;
+                let authorName = audio.getElementsByClassName('song-name-author')[0].innerHTML;
+                let playlistAuthor = audio.getElementsByClassName('playlist-author')[0].innerHTML;
+                if(audioName.toLowerCase().indexOf(value.toLowerCase()) === -1 &&
+                                        authorName.toLowerCase().indexOf(value.toLowerCase()) === -1 &&
+                                        playlistAuthor.toLowerCase().indexOf(value.toLowerCase()) === -1) {
+                    audio.style.display = 'none';
+                } else {
+                    audio.style.display = '';
+                }
+            }
+        }
+    </script>
+    
+    <!-- Stats script -->
+    <script>
+        function normalize_string(s){
+            console.log(s);
+            s = s.toString();
+            s = s.replaceAll(`&`, `&amp;`);
+            s = s.replaceAll(`<`, `&lt;`);
+            s = s.replaceAll(`>`, `&gt;`);
+            s = s.replaceAll(`"`, `&quot;`);
+            s = s.replaceAll(`'`, `&#39;`);
+            return s;
+        }
+
+        function show_full_stats(item) {
+            item.remove();
+            let table = document.querySelector('.stat-table>table>tbody');
+            console.log('Deleted');
+            let audios_json = $.ajax({
+                url: "{% url 'get_audios' %}",
+                type: "GET",
+                dataType: "json",
+                async: false
+            });
+            console.log(audios_json);
+            let audios = audios_json.responseJSON['response'];
+            console.log(audios);
+            let children = table.childNodes;
+            while(children.length > 1)
+                children[children.length-1].remove();
+            for(let i = 0; i < audios.length; i++){
+                let s = `
+                    <tr>
+                        <td>${normalize_string(audios[i]["number"])}</td>
+                        <td>
+                            <div class="song-name">
+                                <div class="song-name-part">
+                                    <img src="${normalize_string(audios[i]["logo_url"])}" alt="">
+                                </div>
+                                <div class="song-name-part">
+                                    <p class="song-name-title">${normalize_string(audios[i]["title"])}</p>
+                                    <p class="song-name-author">${normalize_string(audios[i]["artist"])}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="playlist-author">${normalize_string(audios[i]["playlist_name"])}</td>
+                        <td>${normalize_string(audios[i]["required_pos"])}</td>
+                        <td>${normalize_string(audios[i]["auditions"])}</td>
+                        <td>${normalize_string(audios[i]["added_at"])}</td>
+                    </tr>
+                `;
+                table.insertAdjacentHTML('beforeend', s);
+            }
+        }
+    </script>
+{% endblock %}

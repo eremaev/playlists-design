@@ -1,0 +1,12 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% include 'head_meta.html' %}
+    <link rel="stylesheet" href="{% static 'css/styles_auth.css' %}">
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>

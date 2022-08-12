@@ -1,0 +1,58 @@
+{% extends "base_auth.html" %}
+
+{% block content %}
+    {% load static %}
+    <div class="main">
+        <div class="logo">
+            <img src="{% static 'img/logo.png' %}" alt="Save Music">
+        </div>
+        <p class="head_text"><span class="blue_text">Вход</span> savemusic.ru</p>
+        <form action="." method="post">
+            {% csrf_token %}
+            <div class="login-form-inner">
+                <div class="form-col">
+                    <label for="username">Логин:</label>
+                    <div class="form-part-row">
+                        <input type="text" name="username" id="id_username" required maxlength="150" oninput="is_valid();">
+                    </div>
+                </div>
+                <div class="form-col">
+                    <label for="password">Пароль:</label>
+                    <div class="form-part-row">
+                        <input type="password" autocomplete="current-password" name="password" id="password" required oninput="is_valid();">
+                        <div class="password-control" onclick="return show_hide_password(this);">
+                            <img src="{% static 'img/eye_crossed.png' %}" alt="Пароль">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row-right">
+                <a href="{% url 'password_reset' %}" id="recover-pass">Забыли пароль?</a>
+            </div>
+            {% if form.errors %}
+                <p id="error-message">Ваши имя и пароль не подходят. Попробуйте снова</p>
+            {% endif %}
+            <input class="green-button" type="submit" value="Войти" />
+            <input type="hidden" name="next" value="{{ next }}" />
+            <a class="blue-button" href="{% url 'social:begin' 'vk-oauth2' %}">Войти через ВКонтакте</a>
+        </form>
+        <hr class="gray-line">
+        <div class="to-login-field">
+            <p><a href="{% url 'register' %}">Зарегистрироваться</a></p>
+        </div>
+    </div>
+
+    <!-- Show password -->
+    <script>
+        function show_hide_password(target){
+            let input = target.parentElement.children[0];
+            if (input.type === 'password') {
+                input.type = 'text';
+                target.children[0].src = '{% static 'img/eye.png' %}';
+            } else {
+                input.type = 'password';
+                target.children[0].src = '{% static 'img/eye_crossed.png' %}';
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% load static %}
+<div class="modal-back" id="link-modal-back"
+{% if token_error %}
+        style="display: flex;"
+{% else %}
+     style="display: none;"
+{% endif %}
+>
+    <div class="modal-content">
+        <div class="modal-window">
+            <div class="modal-icons-row">
+                <img src="{% static 'img/vk_logo.png' %}" alt="ВК" width="40">
+                <img src="{% static 'img/link_ico.png' %}" alt="X" width="24">
+                <img src="{% static 'img/logo.png' %}" alt="Save Music" width="61">
+            </div>
+            <div class="modal-header">Привязка плейлистов ВКонтакте</div>
+            <div class="modal-list">
+                <ol>
+                    <li>Откройте <a target="_blank" href="https://oauth.vk.com/authorize?client_id=6121396&scope=4260872&redirect_uri=https://oauth.vk.com/blank.html&display=page&response_type=token&revoke=1">
+                                    эту ссылку</a></li>
+                    <li>Разрешите доступ приложению</li>
+                    <li>Скопируйте из адресной строки ссылку полностью</li>
+                    <li>Вставьте в форму внизу</li>
+                    <li>Нажмите на кнопку "Привязать"</li>
+                </ol>
+            </div>
+            {% if token_error %}
+                <p class="main-text" style="margin-top: 5px;">{{ token_error }}</p>
+            {% endif %}
+            <form method="post" class="modal-form" action="{% url 'profile' %}">
+                {% csrf_token %}
+                <input id="token_field" name="token_field" type="text" autocomplete="off" value="{{ token }}" placeholder="Вставьте ссылку">
+                <input class="submit-link" type="submit" value="Привязать">
+            </form>
+        </div>
+        <div class="modal-close desktop-div" onclick="close_modal();">
+            <img src="{% static 'img/close_button.png' %}" alt="Закрыть" width="28">
+        </div>
+    </div>
+</div>
+
+<!-- open and close modal script -->
+<script>
+    function open_modal() {
+        document.querySelector('#link-modal-back').style.display = 'flex';
+    }
+
+    function close_modal() {
+        document.querySelector('#link-modal-back').style.display = 'none';
+    }
+</script>

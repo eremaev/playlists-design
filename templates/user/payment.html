@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>savemusic</title>
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.png' %}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+</head>
+<body>
+    {% if not error %}
+        <h1>Запрос</h1>
+        <table>
+            <tr>
+                <th>Пользователь</th>
+                <th>Сумма</th>
+                <th>Дата</th>
+                <th>Комментарий</th>
+            </tr>
+            <tr>
+                <td>{{ user }}</td>
+                <td>{{ amount }}</td>
+                <td>{{ date }}</td>
+                <td>{{ comment }}</td>
+            </tr>
+        </table>
+        {% if accept %}
+            <button onclick="confirm();">Оплата выполнена</button>
+        {% else %}
+            <form action="" method="post" class="decor">
+                {% csrf_token %}
+                <label for="reason">Причина отказа:</label>
+                <input type="text" name="reason" id="reason" required>
+                <br>
+                <input type="submit" value="Отказать">
+            </form>
+        {% endif %}
+    {% else %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <script>
+        function confirm() {
+            let s = location.href;
+            // from /payment/<withdraw_id>/<accept>
+            // do /payment/confirm/<withdraw_id>/<accept>
+            s = s.replace('/payment/', '/payment/confirm/');
+            location.href = s;
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        * {
+            font-family: 'Open Sans', sans-serif;
+        }
+        table {
+            font-size: 14px;
+            border-collapse: collapse;
+            text-align: center;
+        }
+        th {
+            background: #AFCDE7;
+            color: white;
+            padding: 10px 20px;
+        }
+        th, td {
+            border-style: solid;
+            border-width: 0 1px 1px 0;
+            border-color: white;
+        }
+        td {
+            background: #D8E6F3;
+        }
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+    </style>
+</body>

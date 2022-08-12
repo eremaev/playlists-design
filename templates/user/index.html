@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block page_name %}
+    <div id="page_name" style="display: none;">Плейлисты</div>
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+    {% if no_token %}
+        {% include 'user/red_error_table.html' %}
+    {% endif %}
+    <div class="items-row stats-search row-space-between">
+        <div class="pl-header-texts">
+            <h1>Плейлисты</h1>
+            <p class="pl-header-light-text">Всего плейлистов: {{ playlists|length }}</p>
+        </div>
+        <div class="search">
+            <img src="{% static 'img/search_icon.png' %}" alt="Поиск">
+            <input type="search" autocomplete="off" value="" placeholder="Поиск" id="search-input" oninput="searchTrigger();">
+        </div>
+    </div>
+    {% if error_message %}
+        <div class="items-row">
+            <p class="main-text">{{ error_message }}</p>
+        </div>
+    {% endif %}
+    <div class="playlists-table">
+        <table>
+            <tr>
+                <th>Плейлисты</th>
+                <th>Прослушивания за сутки</th>
+                <th>
+                    <span class="mobile-text">За неделю</span>
+                    <span class="desktop-text">Прослушивания за неделю</span>
+                </th>
+                <th>
+                    <a href="?update=true">
+                        <div class="table-control">
+                            <img src="{% static 'img/refresh_button.png' %}" alt="Обновить">
+                        </div>
+                    </a>
+                </th>
+            </tr>
+            {% for playlist in playlists %}
+            <tr onclick="showHide('{{ playlist.0.id }}');" style="user-select: none;">
+                <td>
+                    <div class="song-name">
+                        <div class="song-name-part">
+                            <img src="{{ playlist.1.1 }}" alt="">
+                        </div>
+                        <div class="song-name-part">
+                            <p class="song-name-title">{{ playlist.0.name }}</p>
+                            <p class="song-name-author">{{ playlist.0.owner_link }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td data-auditions-day="{{ playlist.0.id }}">0</td>
+                <td data-auditions-week="{{ playlist.0.id }}">0</td>
+                <td>
+                    <div class="open-playlist-info">
+                        <img src="{% static 'img/down_pl_ico.png' %}" alt="Развернуть" id="img{{ playlist.0.id }}">
+                    </div>
+                </td>
+            </tr>
+            <tr data-opened="false" id="{{ playlist.0.id }}" style="display: none;">
+                <td colspan="4">
+                    <p class="song-name-title" style="display: none;">{{ playlist.0.name }}</p>
+                    <div class="full-playlist-info">
+                        <div class="chart-container">
+                            <p id="p-{{ playlist.0.id }}" class="main-text" style="display: none; margin-bottom: 10px;">Данные появятся после обновления информации</p>
+                            <div class="canvas_wrapper" style="
+                                {#width: 570px;#}
+                                overflow: hidden;
+                                border-radius: 10px;
+                            ">
+                                <canvas data-playlist-id="{{ playlist.0.id }}" class="charts"></canvas>
+                            </div>
+                        </div>
+                        <div class="infos-container">
+                            <div class="white-block">
+                                <div class="left-block-part">
+                                    <img src="{% static 'img/headphones_ico.png' %}" alt="">
+                                </div>
+                                <div class="right-block-part">
+                                    <p class="bold-text block-part-header" data-auditions-day="{{ playlist.0.id }}">68 000</p>
+                                    <p class="main-text">Прослушиваний за сутки</p>
+                                </div>
+                            </div>
+                            <div class="white-block">
+                                <div class="left-block-part">
+                                    <img src="{% static 'img/star_ico.png' %}" alt="">
+                                </div>
+                                <div class="right-block-part">
+                                    <p class="bold-text block-part-header">{{ playlist.1.0 }} место</p>
+                                    <p class="main-text">Среди всех плейлистов</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- Search script -->
+    <script>
+        function searchTrigger() {
+            let searchInput = document.getElementById('search-input');
+            let value = searchInput.value;
+            let playlists = document.getElementsByClassName('playlists-table')[0].getElementsByTagName('tr');
+            for(let i = 1; i < playlists.length; i++) {
+                let playlist = playlists[i];
+                let playlistName = playlist.getElementsByClassName('song-name-title')[0].innerHTML;
+                if(playlistName.toLowerCase().indexOf(value.toLowerCase()) === -1) {
+                    playlist.style.display = 'none';
+                } else {
+                    if(playlist.dataset.opened !== 'false') {
+                        playlist.style.display = '';
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Show/hide script -->
+    <script>
+    function showHide(id){
+        let div = document.getElementById(id);
+        let img = document.getElementById('img' + id);
+        if (div.style.display === "none") {
+            div.style.display = "";
+            div.dataset.opened = 'true';
+            img.src = "{% static 'img/up_pl_ico.png' %}";
+        } else {
+            div.style.display = "none";
+            div.dataset.opened = 'false';
+            img.src = "{% static 'img/down_pl_ico.png' %}";
+        }
+    }
+    </script>
+
+    <!-- Charts script -->
+    <script>
+        // jquery function
+
+        function get_playlist_name(playlist_id) {
+            let un_pl = [
+                {% for item in playlists %}
+                    ["{{ item.0.id }}", "{{ item.0.name }}"],
+                {% endfor %}
+            ];
+            for (let i = 0; i < un_pl.length; i++) {
+                if (un_pl[i][0] == playlist_id) {
+                    return un_pl[i][1];
+                }
+            }
+            return '';
+        }
+
+        function string_to_date(str_date) {
+            let a_date = parseInt(str_date.split(' ')[0]);
+            let a_month = str_date.split(' ')[1];
+            let a_year = parseInt(str_date.split(' ')[2]);
+            let month_dict = {
+                'января': 0,
+                'февраля': 1,
+                'марта': 2,
+                'апреля': 3,
+                'мая': 4,
+                'июня': 5,
+                'июля': 6,
+                'августа': 7,
+                'сентября': 8,
+                'октября': 9,
+                'ноября': 10,
+                'декабря': 11
+            }
+            return new Date(a_year, month_dict[a_month], a_date);
+        }
+
+        function date_to_string(dt){
+            let month_dict = {
+                0: 'января',
+                1: 'февраля',
+                2: 'марта',
+                3: 'апреля',
+                4: 'мая',
+                5: 'июня',
+                6: 'июля',
+                7: 'августа',
+                8: 'сентября',
+                9: 'октября',
+                10: 'ноября',
+                11: 'декабря'
+            }
+            return dt.getDate() + ' ' + month_dict[dt.getMonth()];
+        }
+
+        function get_labels_and_dates(playlist_id) {
+            let un_au = [
+                {% for item in auditions %}
+                    ["{{ item.playlist.id }}", {{ item.number }}, "{{ item.date }}"],
+                {% endfor %}
+            ];
+            let result = [];
+            for (let i = 0; i < un_au.length; i++) {
+                if (un_au[i][0] == playlist_id) {
+                    result.push([un_au[i][1], un_au[i][2]]);
+                }
+            }
+            // sort by dates
+            // format: "14 июня 2022 г."
+            result.sort(function(a, b) {
+                return string_to_date(a[1]) - string_to_date(b[1]);
+            });
+            let labels = [], dates = [];
+            for (let i = 0; i < result.length; i++) {
+                labels.push(result[i][0]);
+                dates.push(string_to_date(result[i][1]));
+            }
+            return [labels, dates];
+        }
+
+        $(document).ready(function () {
+            var charts = document.getElementsByClassName('charts');
+            for (let i = 0; i < charts.length; i++) {
+                let chart = charts[i];
+                let playlist_id = chart.getAttribute('data-playlist-id');
+                let playlist_name = get_playlist_name(playlist_id);
+                let labels_and_dates = get_labels_and_dates(playlist_id);
+                let labels = labels_and_dates[0];
+                let dates = labels_and_dates[1];
+                if(labels.length > 8) {
+                    labels = labels.slice(labels.length - 8, labels.length);
+                    dates = dates.slice(dates.length - 8, dates.length);
+                }
+                if(labels.length === 0){
+                    document.getElementById("p-"+playlist_id).style.display = "";
+                }
+                let new_dates = [];
+                let new_labels = [];
+                for(let x = 0; x < 8; x++) {
+                    let tmp_d = string_to_date("{{ today_date }}");
+                    tmp_d.setDate(tmp_d.getDate() - x);
+                    new_dates.push(date_to_string(tmp_d));
+                    let was_found = false;
+                    for(let y = 0; y < dates.length; y++) {
+                        if(dates[y].getTime() === tmp_d.getTime()) {
+                            was_found = true;
+                            new_labels.push(labels[y]);
+                            break;
+                        }
+                    }
+                    if(!was_found) {
+                        new_labels.push(NaN);
+                    }
+                }
+                new_labels = new_labels.reverse();
+                new_dates = new_dates.reverse();
+                new_dates.shift();
+                for(let x = new_labels.length-1; x > 0; x--){
+                    if((!isNaN(new_labels[x])) && (!isNaN(new_labels[x-1]))){
+                        new_labels[x] -= new_labels[x-1];
+                    }else{
+                        new_labels[x] = NaN;
+                    }
+                }
+                new_labels.shift();
+                let daily_auditions = new_labels[new_labels.length-1];
+                if(isNaN(new_labels[new_labels.length-1]))
+                    daily_auditions = 0;
+                let week_auditions = 0;
+                for(let x = 0; x < new_labels.length; x++){
+                    if(!isNaN(new_labels[x]))
+                        week_auditions += new_labels[x];
+                }
+                let set_daily = document.querySelectorAll('[data-auditions-day="'+playlist_id+'"]');
+                for(let x = 0; x < set_daily.length; x++){
+                    set_daily[x].innerHTML = daily_auditions;
+                }
+                let set_week = document.querySelectorAll('[data-auditions-week="'+playlist_id+'"]');
+                for(let x = 0; x < set_week.length; x++){
+                    set_week[x].innerHTML = week_auditions.toString();
+                }
+                let ctx = chart.getContext('2d');
+                let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+                gradient.addColorStop(0.38, 'rgba(255, 255, 255, 0.4)');
+                gradient.addColorStop(0.8, 'rgba(255, 255, 255, 0)');
+                const plugin = {
+                    id: 'custom_canvas_background_color',
+                    beforeDraw: (chart) => {
+                        const ctx = chart.canvas.getContext('2d');
+                        ctx.save();
+                        ctx.globalCompositeOperation = 'destination-over';
+                        ctx.fillStyle = '#3F8AE0';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                };
+                let myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: new_dates,
+                        datasets: [{
+                            data: new_labels,
+                            backgroundColor: gradient,
+                            borderColor: '#FFFFFF',
+                            pointBackgroundColor: '#FFFFFF',
+                            pointBorderColor: 'rgb(0, 0, 0, 0)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false,
+                                    drawOnChartArea: false,
+                                },
+                                ticks: {
+                                    color: '#FFFFFF'
+                                }
+                            },
+                            y: {
+                                grid: {
+                                    display: false,
+                                    drawBorder: false,
+                                    drawOnChartArea: false,
+                                },
+                                display: false,
+                                ticks: {
+                                    color: '#FFFFFF',
+                                    beginAtZero: true
+                                },
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                enabled: true,
+                                backgroundColor: '#FFF',
+                                bodyColor: '#333',
+                                bodyFont: {
+                                    family: '-apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                                    size: 14,
+                                    weight: 600,
+                                    lineHeight: '18px'
+                                },
+                                callbacks: {
+                                    title: function() {},
+                                },
+                                displayColors: false,
+                                xAlign: 'center',
+                                yAlign: 'bottom'
+                            }
+                        },
+                        elements: {
+                            point: {
+                                {#radius: 30,#}
+                                {#hoverRadius: 30,#}
+                            }
+                        }
+                    },
+                    plugins: [plugin],
+                });
+            }
+        });
+    </script>
+{% endblock %}

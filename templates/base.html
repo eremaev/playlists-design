@@ -1,0 +1,362 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% include 'head_meta.html' %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=111">
+</head>
+<body>
+    {% block page_name %}{% endblock %}
+    <nav>
+        <div class="nav-part">
+            <div class="logo" onclick="location.href='{% url "index" %}';">
+                <img src="{% static 'img/logo.png' %}" alt="Save Music">
+            </div>
+            {% if mini_sidebar %}
+            <div class="menu-btn" onclick="show_hide_sidebar();" style="margin-left: 6px; margin-right: 177px;">
+                <img id="sidebar-image" src="{% static 'img/show_sidebar.png' %}" alt="Меню">
+            </div>
+            {% else %}
+            <div class="menu-btn" onclick="show_hide_sidebar();">
+                <img id="sidebar-image" src="{% static 'img/hide_sidebar.png' %}" alt="Меню">
+            </div>
+            {% endif %}
+            <div id="navbar-header">Save Playlists</div>
+        </div>
+        <div class="nav-part">
+            {% if not balance_amount is None %}
+                <div id="balance">Баланс: {{ balance_amount }}</div>
+            {% endif %}
+            <div class="notifications-button" onclick="show_hide_notifications();">
+                <img src="{% static 'img/notifications.png' %}" alt="Уведомления">
+            </div>
+            <div class="profile-info" onclick="show_hide_profile_menu();">
+                <img src="{{ user.vk_user.avatar_url }}"
+                     alt="Аватарка" class="profile-logo" width="32" height="32">
+                <div class="profile-name">{{ user.get_username }}</div>
+                <div id="show-profile-menu">
+                    <img src="{% static 'img/down.png' %}" alt="Открыть" class="btn-open">
+                    <img src="{% static 'img/up.png' %}" alt="Закрыть" class="btn-close" style="display: none;">
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="notifications" style="display: none;">
+        {% if notifications %}
+            <div class="rows-wrapper">
+                {% for notification in notifications %}
+                    <div class="notification-row">
+                        <img src="{{ avatar_url }}" alt="" class="profile-logo" width="32" height="32">
+                        <div class="notification-content">
+                            <div class="notification-text">{{ notification.message }}</div>
+                            <div class="notification-date">{{ notification.date }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+        <div class="notification-row">
+            <img src="{{ avatar_url }}" alt="" class="profile-logo" width="32" height="32">
+            <div class="notification-content">
+                <div class="notification-text">Уведомления скоро появятся</div>
+            </div>
+        </div>
+        {% endif %}
+        <hr class="gray-line">
+        <div class="delete-row" onclick="delete_notifications();">
+            <img src="{% static 'img/delete_icon.png' %}" alt="">
+            <div class="notification-text">Удалить всё</div>
+        </div>
+    </div>
+    <div class="profile-menu" style="display: none;">
+        <div class="menu-row" onclick="open_modal();">
+            <img src="{% static 'img/menu_settings.png' %}" alt="Настройки">
+            <div class="plain-text">Привязать плейлисты</div>
+        </div>
+        <div class="menu-row" onclick="location.href='{% url "withdraw" %}'">
+            <img src="{% static 'img/ruble.png' %}" alt="Вывод средств">
+            <div class="plain-text">Вывод средств</div>
+        </div>
+        <hr class="gray-line">
+        <div class="menu-row" onclick="location.href='{% url "logout" %}'">
+            <div class="red plain-text">Выйти из аккаунта</div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="sidebar"
+            {% if mini_sidebar %}
+                style="display: none;"
+            {% endif %}
+        >
+            <a href="{% url "profile" %}" class="nav-link">
+                <div class="side-cell">
+                    <img src="{% static 'img/profile_ico.png' %}" alt="Профиль">
+                    <div class="sidebar-row-text">Профиль</div>
+                </div>
+            </a>
+            <a href="{% url "index" %}" class="nav-link">
+                <div class="side-cell">
+                    <img src="{% static 'img/playlists_ico.png' %}" alt="Плейлисты">
+                    <div class="sidebar-row-text">Плейлисты</div>
+                </div>
+            </a>
+            <a href="{% url "withdraw" %}" class="nav-link">
+                <div class="side-cell">
+                    <img src="{% static 'img/deposit_ico.png' %}" alt="Вывод средств">
+                    <div class="sidebar-row-text">Вывод средств</div>
+                </div>
+            </a>
+            <a href="{% url "support" %}" class="nav-link">
+                <div class="side-cell">
+                    <img src="{% static 'img/support_ico.png' %}" alt="Поддержка">
+                    <div class="sidebar-row-text">Поддержка</div>
+                </div>
+            </a>
+            <a href="{% url 'settings' %}" class="nav-link">
+                <div class="side-cell">
+                    <img src="{% static 'img/settings.png' %}" alt="Настройки">
+                    <div class="sidebar-row-text">Настройки</div>
+                </div>
+            </a>
+
+        </div>
+        <div class="mini-sidebar"
+            {% if not mini_sidebar %}
+                style="display: none;"
+            {% endif %}
+        >
+            <a href="{% url "profile" %}" class="nav-link">
+                <div class="mini-side-cell">
+                    <img src="{% static 'img/profile_ico.png' %}" alt="Профиль">
+                </div>
+            </a>
+            <a href="{% url "index" %}" class="nav-link">
+                <div class="mini-side-cell">
+                    <img src="{% static 'img/playlists_ico.png' %}" alt="Плейлисты">
+                </div>
+            </a>
+            <a href="{% url "withdraw" %}" class="nav-link">
+                <div class="mini-side-cell">
+                    <img src="{% static 'img/deposit_ico.png' %}" alt="Вывод средств">
+                </div>
+            </a>
+            <a href="{% url "support" %}" class="nav-link">
+                <div class="mini-side-cell">
+                    <img src="{% static 'img/support_ico.png' %}" alt="Поддержка">
+                </div>
+            </a>
+            <a href="{% url "settings" %}" class="nav-link">
+                <div class="mini-side-cell">
+                    <img src="{% static 'img/settings.png' %}" alt="Настройки">
+                </div>
+            </a>
+
+        </div>
+        <div class="body">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <div class="mobile-sidebar">
+        <a href="{% url "profile" %}" class="mobile-nav-link">
+            <div class="mobile-side-cell">
+                <img src="{% static 'img/profile_ico.png' %}" alt="Профиль">
+                <div class="mobile-cell-text">Профиль</div>
+            </div>
+        </a>
+        <a href="{% url "index" %}" class="nav-link">
+            <div class="mobile-side-cell">
+                <img src="{% static 'img/playlists_ico.png' %}" alt="Плейлисты">
+                <div class="mobile-cell-text">Плейлисты</div>
+            </div>
+        </a>
+        <a href="{% url "withdraw" %}" class="nav-link">
+            <div class="mobile-side-cell">
+                <img src="{% static 'img/deposit_ico.png' %}" alt="Вывод">
+                <div class="mobile-cell-text">Вывод</div>
+            </div>
+        </a>
+        <a href="{% url "support" %}" class="nav-link">
+            <div class="mobile-side-cell">
+                <img src="{% static 'img/support_ico.png' %}" alt="Поддержка">
+                <div class="mobile-cell-text">Поддержка</div>
+            </div>
+        </a>
+        <a href="{% url "settings" %}" class="nav-link">
+            <div class="mobile-side-cell">
+                <img src="{% static 'img/settings.png' %}" alt="Настройки">
+                <div class="mobile-cell-text">Настройки</div>
+            </div>
+        </a>
+
+    </div>
+    {% include 'user/link_modal.html' %}
+
+    <!-- show and hide sidebar -->
+    <script>
+        function setCookie(name, value, options = {}) {
+            options = {
+            path: '/',
+            ...options
+            };
+
+            if (options.expires instanceof Date) {
+                options.expires = options.expires.toUTCString();
+            }
+
+            let updatedCookie = encodeURIComponent(name) + "=" + encodeURIComponent(value);
+
+            for (let optionKey in options) {
+                updatedCookie += "; " + optionKey;
+                let optionValue = options[optionKey];
+                if (optionValue !== true) {
+                  updatedCookie += "=" + optionValue;
+                }
+            }
+
+            document.cookie = updatedCookie;
+        }
+
+        function show_hide_sidebar(){
+            let btn = document.getElementById('sidebar-image');
+            // find pos of third / in btn.src
+            let pos = btn.src.indexOf('/', btn.src.indexOf('/', btn.src.indexOf('/') + 1) + 1);
+            let new_src = btn.src.substring(pos, btn.src.length);
+            let div_btn = document.getElementsByClassName('menu-btn')[0];
+            if(new_src == "{% static 'img/hide_sidebar.png' %}"){
+                btn.src = "{% static 'img/show_sidebar.png' %}";
+                div_btn.style.marginLeft = "6px";
+                div_btn.style.marginRight = "177px";
+            }
+            else{
+                btn.src = "{% static 'img/hide_sidebar.png' %}";
+                div_btn.style.marginLeft = "114px";
+                div_btn.style.marginRight = "69px";
+            }
+
+            let sidebar = document.querySelector('.sidebar');
+            let mini_sidebar = document.querySelector('.mini-sidebar');
+            if(sidebar.style.display == 'none'){
+                sidebar.style.display = 'flex';
+                mini_sidebar.style.display = 'none';
+                setCookie("mini_sidebar", "false", {"max-age": 3600*24*300});
+            }else{
+                sidebar.style.display = 'none';
+                mini_sidebar.style.display = 'flex';
+                setCookie("mini_sidebar", "true", {"max-age": 3600*24*300});
+            }
+        }
+
+        function getCookie(name) {
+          let matches = document.cookie.match(new RegExp(
+            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+          ));
+          return matches ? decodeURIComponent(matches[1]) : undefined;
+        }
+
+    </script>
+
+    <!-- show and hide profile menu and notifications -->
+    <script>
+        let is_opened = false;
+        let is_opened_notifications = false;
+        function show_hide_profile_menu(){}
+        function show_hide_notifications(){}
+
+        show_hide_profile_menu = function(){
+            if(is_opened_notifications) show_hide_notifications();
+            is_opened = !is_opened;
+            let profile_info = document.getElementsByClassName('profile-info')[0];
+            if(is_opened){
+                document.getElementsByClassName('btn-close')[0].style.display = '';
+                document.getElementsByClassName('btn-open')[0].style.display = 'none';
+
+                profile_info.style.background = 'rgba(174, 183, 194, 0.2)';
+                profile_info.style.border = '1px solid rgba(0, 0, 0, 0.08)';
+                profile_info.style.borderRadius = '4px';
+            }else{
+                document.getElementsByClassName('btn-close')[0].style.display = 'none';
+                document.getElementsByClassName('btn-open')[0].style.display = '';
+
+                profile_info.style.background = '';
+                profile_info.style.border = '';
+                profile_info.style.borderRadius = '';
+            }
+            let x = document.getElementsByClassName("profile-menu")[0];
+            if (is_opened) {
+                x.style.display = "";
+            } else {
+                x.style.display = "none";
+            }
+        }
+
+        show_hide_notifications = function(){
+            if(is_opened) show_hide_profile_menu();
+            is_opened_notifications = !is_opened_notifications;
+            let notifications = document.getElementsByClassName('notifications')[0];
+            if(is_opened_notifications)
+                notifications.style.display = "";
+            else
+                notifications.style.display = "none";
+        }
+    </script>
+
+    <!-- ajax delete notifications -->
+    <script>
+        function delete_notifications(){
+            $.ajax({
+                url: '{% url 'delete_notifications' %}',
+                success: function(data){
+                    location.reload();
+                }
+            })
+        }
+    </script>
+
+    <!-- update header and sidebar -->
+    <script>
+        $(document).ready(function(){
+            let check = document.getElementById("page_name");
+            if(check != null){
+                document.getElementById("navbar-header").innerHTML = check.innerHTML;
+                let sidebar_texts = document.getElementsByClassName('sidebar-row-text');
+                for(let i = 0; i < sidebar_texts.length; i++){
+                    if(sidebar_texts[i].innerHTML == check.innerHTML){
+                        sidebar_texts[i].parentElement.classList.add("side-cell--active");
+                        break;
+                    }
+                }
+                let mini_sidebar_cells = document.getElementsByClassName('mini-side-cell');
+                for(let i = 0; i < mini_sidebar_cells.length; i++){
+                    let image = mini_sidebar_cells[i].querySelector('img');
+                    if(image.alt == check.innerHTML){
+                        mini_sidebar_cells[i].classList.add("mini-side-cell--active");
+                        break;
+                    }
+                }
+            }
+        });
+    </script>
+
+    <!-- ios fix -->
+    <script>
+        window.onload = function () {
+            // scroll to top
+            window.scrollTo(0, 0);
+        };
+    </script>
+
+    <!-- close modals -->
+    <script>
+        document.onclick = function (e) {
+            if(e.target.className === 'modal-back') {
+                if(typeof close_modal !== 'undefined')
+                    close_modal();
+                if(typeof close_modal_request !== 'undefined')
+                    close_modal_request();
+            }
+        }
+    </script>
+</body>
+</html>

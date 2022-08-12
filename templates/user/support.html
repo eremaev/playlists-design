@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block page_name %}
+    <div id="page_name" style="display: none;">Поддержка</div>
+{% endblock %}
+
+{% block content %}
+    {% load static %}
+    <div class="main-flex">
+        <div class="main-left-part">
+            <div class="items-row stats-search">
+                <div class="pl-header-texts">
+                    <h1>Задайте свой вопрос</h1>
+                    <p class="pl-header-light-text">Скоро здесь будут часто задаваемые вопросы</p>
+                </div>
+            </div>
+            <!-- div class="items-row">
+                <div class="search">
+                    <img src="{% static 'img/search_icon.png' %}" alt="Поиск">
+                    <input type="search" autocomplete="off" value="" placeholder="Поиск" id="search-input"
+                           oninput="searchTrigger();">
+                </div>
+            </div -->
+            <div class="themes-column">
+                <div class="theme" onclick="change_active(this);">
+                    <div class="theme__title">Как привязать плейлист ВКонтакте (для ПК)</div>
+                    <img src="{% static 'img/arrows_right.png' %}" alt="">
+                </div>
+                <div class="theme" onclick="change_active(this);">
+                    <div class="theme__title">Как привязать плейлист ВКонтакте (для телефона)</div>
+                    <img src="{% static 'img/arrows_right.png' %}" alt="">
+                </div>
+                <div class="theme" onclick="change_active(this);">
+                    <div class="theme__title">Привязка к банку</div>
+                    <img src="{% static 'img/arrows_right.png' %}" alt="">
+                </div>
+                <div class="theme" onclick="change_active(this);">
+                    <div class="theme__title">Формирование статистики</div>
+                    <img src="{% static 'img/arrows_right.png' %}" alt="">
+                </div>
+            </div>
+            <div class="items-row">
+                <div class="blue-modal">
+                    <img src="{% static 'img/circles.png' %}" alt="" class="background-circles">
+                    <p class="blue-modal__large-text">Все еще нужна помощь?</p>
+                    <p class="blue-modal__text">Ответим в течение часа</p>
+                    <a href="{{ personal_link }}" target="_blank">
+                        <div class="blue-modal__button">Написать нам</div>
+                    </a>
+                </div>
+            </div>
+            <div class="items-row">
+                <div class="blue-modal">
+                    <img src="{% static 'img/circles.png' %}" alt="" class="background-circles">
+                    <p class="blue-modal__large-text">Наша группа ВК</p>
+                    <p class="blue-modal__text">Все новости тут</p>
+                    <a href="{{ group_link }}" target="_blank">
+                        <div class="blue-modal__button">Вступить</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="main-right-part"></div>
+    </div>
+
+    <script>
+        function searchTrigger() {
+
+        }
+
+        var questions_db = {
+            'Как привязать плейлист ВКонтакте (для ПК)': [
+                ['vk, link', 'Как привязать плейлист ВКонтакте с компьютера?', `
+                    <p>Для успешной работы сервиса необходимо привязать хотя бы один плейлист ВКонтакте. Для этого необходимо нажать на свое имя в правом верхнем углу, а далее на кнопку "Привязать плейлисты".</p>
+                    <img src="{% static "img/screenshots/scr1.png" %}">
+                    <p>Далее необходимо нажать на текст "эту ссылку"</p>
+                    <img src="{% static "img/screenshots/scr2.png" %}">
+                    <p>Откроется новая вкладка где необходимо нажать кнопку "Разрешить"</p>
+                    <p><i>Обращаем внимание, что вы даете доступ только к своим аудиозаписям и некоторым данным профиля (имя, фамилия, дата рождения и.т.п.). Больше доступа у сервиса никакого нет.</i></p>
+                    <img src="{% static "img/screenshots/scr3.png" %}">
+                    <p>После нажатия на кнопку "Разрешить" вы автоматически попадете на другую страницу, где необходимо будет скопировать <b>все из адресной строки браузера</b>.</p>
+                    <img src="{% static "img/screenshots/scr4.png" %}">
+                    <p>После того как вы скопировали, необходимо вернуться на сайт Save Playlists и в форму вставить все что вы скопировали, а потом нажать на кнопку "Привязать".</p>
+                    <p>Поздравляем вы привязали свои плейлисты ВКонтакте! Теперь песни будут размещаться автоматически, а баллы за каждый трек будут начисляться за каждые сутки!</p>
+                `]
+            ],
+            'Как привязать плейлист ВКонтакте (для телефона)': [
+                ['vk, mobile, link', 'Как привязать плейлист ВКонтакте с мобильного телефона?', `
+                    <p>Для успешной работы сервиса необходимо привязать хотя бы один плейлист ВКонтакте. Для этого необходимо нажать на свое имя в правом верхнем углу, а далее на кнопку "Привязать плейлисты".</p>
+                    <img src="{% static "img/screenshots/scr5.png" %}">
+                    <p>Далее необходимо нажать на текст "эту ссылку"</p>
+                    <img src="{% static "img/screenshots/scr6.png" %}">
+                    <p>Откроется новая вкладка где необходимо нажать кнопку "Разрешить"</p>
+                    <p><i>Обращаем внимание, что вы даете доступ только к своим аудиозаписям и некоторым данным профиля (имя, фамилия, дата рождения и.т.п.). Больше доступа у сервиса никакого нет.</i></p>
+                    <img src="{% static "img/screenshots/scr7.png" %}">
+                    <p>После нажатия на кнопку "Разрешить" вы автоматически попадете на другую страницу, где необходимо будет скопировать <b>все из адресной строки браузера</b>.</p>
+                    <img src="{% static "img/screenshots/scr8.png" %}">
+                    <img src="{% static "img/screenshots/scr9.png" %}">
+                    <p>После того как вы скопировали, необходимо вернуться на сайт Save Playlists и в форму вставить все что вы скопировали, а потом нажать на кнопку "Привязать".</p>
+                    <img src="{% static "img/screenshots/scr10.png" %}">
+                    <p>Поздравляем вы привязали свои плейлисты ВКонтакте! Теперь песни будут размещаться автоматически, а баллы за каждый трек будут начисляться за каждые сутки!</p>
+                `]
+            ],
+            'Привязка к банку': [],
+            'Формирование статистики': [],
+        };
+
+        function change_active(e) {
+            // delete current active
+            let active = document.querySelector('.theme-active');
+            if (active) {
+                active.classList.remove('theme-active');
+            }
+            // add active to clicked
+            e.classList.add('theme-active');
+            // change questions in right part
+            let theme = e.innerText;
+            let questions = document.querySelector('.main-right-part');
+            // delete old questions
+            while (questions.firstChild) {
+                questions.removeChild(questions.firstChild);
+            }
+            // add new questions
+            let questions_list = questions_db[theme];
+            if(questions_list){
+                questions_list.forEach(function (question) {
+                    let s = `
+                        <div class="gray-support-block">
+                            <div class="tags">
+                                <img src="{% static 'img/tag_icon.png' %}" alt="Теги">
+                                <div class="tags__text">${question[0]}</div>
+                            </div>
+                            <div class="gray-support-block__header">${question[1]}</div>
+                            <div class="gray-support-block__text">${question[2]}</div>
+                        </div>
+                    `;
+                    questions.insertAdjacentHTML('beforeend', s);
+                });
+            }
+        }
+
+        window.onload = function () {
+            let theme_column = document.querySelector('.themes-column');
+            change_active(theme_column.getElementsByClassName('theme')[0]);
+        };
+    </script>
+{% endblock %}

@@ -1,0 +1,297 @@
+{% extends "base.html" %}
+
+{% block page_name %}
+    <div id="page_name" style="display: none;">Настройки</div>
+{% endblock %}
+
+{% block content %}
+{% load static %}
+<div class="items-row stats-search row-space-between">
+        <div class="pl-header-texts">
+            <h1>Плейлисты</h1>
+            <p class="pl-header-light-text">Всего плейлистов: {{ playlists|length }}</p>
+        </div>
+        <div class="search">
+            <img src="{% static 'img/search_icon.png' %}" alt="Поиск">
+            <input type="search" autocomplete="off" value="" placeholder="Поиск" id="search-input" oninput="searchTrigger();">
+        </div>
+    </div>
+    {% if error_message %}
+        <div class="items-row">
+            <p class="main-text">{{ error_message }}</p>
+        </div>
+    {% endif %}
+    <div class="playlists-table">
+        <form action="submit" method="post">
+        <table>
+            {% csrf_token %}
+            <tr>
+                <th>Плейлисты</th>
+                <th>Прослушивания за сутки</th>
+                <th>
+                    <span class="mobile-text">За неделю</span>
+                    <span class="desktop-text">Прослушивания за неделю</span>
+                </th>
+                <th>
+                    <a href='?update=true'>
+                        <div class="table-control">
+                            <img src="{% static 'img/refresh_button.png' %}" alt="Обновить">
+                        </div>
+                    </a>
+                </th>
+            </tr>
+                {% for playlist in playlists %}
+            <tr onclick="showHide('{{ playlist.id }}');" style="user-select: none;">
+                <td>
+                    <div class="song-name">
+
+                        {% if playlist.is_protected == True %}
+                                            <input type="checkbox"
+                                                   name="playlist_checkbox"
+                                                   id="checkbox_{{playlist.id}}"
+                                                   class="checkbox"
+                                                   value="{{playlist.playlist_id}}">
+                        {% else %}
+                                            <input type="checkbox"
+                                                   name="playlist_checkbox"
+                                                   id="checkbox_{{playlist.id}}"
+                                                   class="checkbox"
+                                                   value="{{playlist.playlist_id}}"
+                                            checked>
+                        {% endif %}
+                        <label class="check_label" for="checkbox_{{playlist.id}}"></label>
+
+                        <div class="song-name-part">
+                            <img src="{{ playlist.logo_url }}" alt="">
+                        </div>
+
+                        <div class="song-name-part">
+                            <p class="song-name-title">{{ playlist.name }}</p>
+                            <p class="song-name-author">{{ playlist.owner_link }}</p>
+                        </div>
+                    </div>
+                </td>
+                <td data-auditions-day="{{ playlist.id }}">0</td>
+                <td data-auditions-week="{{ playlist.id }}">0</td>
+                <td>
+                    <div class="open-playlist-info" >
+                        <img src="{% static 'img/down_pl_ico.png' %}" alt="Развернуть" id="img{{ playlist.0.id }}">
+                    </div>
+                </td>
+            </tr>
+
+            <tr data-opened="false" class="modal" id="{{ playlist.id }}" style="display: none; border-bottom: none;">
+
+                <th>#Название</th>
+                <th></th>
+
+                <th>Альбом</th>
+                {% for track in playlist.tracks.all %}
+                    {% if track.position in playlist.protected_poses.protected %}
+                    <tr class="modal_{{playlist.id}}" style="display: none; border-bottom: none;">
+                    <td>
+                        <div class="song-name">
+                            <input type="checkbox"
+                               class="checkbox"
+                               name="track_checkbox"
+                               id="checkbox_{{track.id}}"
+                               value="{{playlist.playlist_id}}_{{track.position}}" checked>
+                        <label class="check_label" for="checkbox_{{track.id}}"></label>
+                           <span>{{track.position}}</span>
+                        <div class="track-img song-name-part">
+                        <img src="{{track.img_url}}" alt="">
+                        </div>
+                             <div class="song-name-part">
+                            <p class="track-name song-name-title">{{track.title}}</p>
+                            <p class="track-author song-name-author">{{track.author}}</p>
+                        </div>
+                        </div>
+                        </td>
+                        <td></td>
+
+                        <td><p class="album-name">{{playlist.name}}</p></td>
+                </tr>
+            {% else %}
+            <tr class="modal_{{playlist.id}}" style="display: none; border-bottom: none;">
+                    <td>
+                        <div class="song-name">
+                            <input type="checkbox"
+                               class="checkbox"
+                               name="track_checkbox"
+                               id="checkbox_{{track.id}}"
+                               value="{{playlist.playlist_id}}_{{track.position}}">
+                        <label class="check_label" for="checkbox_{{track.id}}"></label>
+                           <span>{{track.position}}</span>
+                        <div class="track-img song-name-part">
+                        <img src="{{track.img_url}}" alt="">
+                        </div>
+                             <div class="song-name-part">
+                            <p class="track-name song-name-title">{{track.title}}</p>
+                            <p class="track-author song-name-author">{{track.author}}</p>
+                        </div>
+                        </div>
+                        </td>
+                <td></td>
+
+                <td><p class="album-name">{{playlist.name}}</p></td>
+                </tr>
+                                    {% endif %}
+
+
+                {% endfor %}
+
+            {% endfor %}
+
+            </table>
+            <div class="footer">
+            <p class="note">В плейлисты и места в плейлистах рядом с которыми стоит галочка будут публиковаться песни автоматически</p>
+             <button class="btn" type="submit">Сохранить</button>
+                </div>
+            </form>
+
+                </div>
+
+<!-- Search script -->
+    <script>
+        function searchTrigger() {
+            let searchInput = document.getElementById('search-input');
+            let value = searchInput.value;
+            let playlists = document.getElementsByClassName('playlists-table')[0].getElementsByTagName('tr');
+            for(let i = 1; i < playlists.length; i++) {
+                let playlist = playlists[i];
+                let playlistName = playlist.getElementsByClassName('song-name-title')[0].innerHTML;
+                if(playlistName.toLowerCase().indexOf(value.toLowerCase()) === -1) {
+                    playlist.style.display = 'none';
+                } else {
+                    if(playlist.dataset.opened !== 'false') {
+                        playlist.style.display = '';
+                    }
+                }
+            }
+        }
+    </script>
+
+<script>
+    function showHide(id){
+        let modals = document.getElementsByClassName('modal_'+id)
+        let div = document.getElementById(id);
+        let img = document.getElementById('img' + id);
+
+        if (div.style.display === "none") {
+            div.style.display = "";
+            div.dataset.opened = 'true';
+            for (var i = 0; i < modals.length; i++) {
+                modals[i].style.display = "";
+            }
+            img.src = "{% static 'img/up_pl_ico.png' %}";
+        } else {
+            div.style.display = "none";
+            for (var i = 0; i < modals.length; i++) {
+                modals[i].style.display = "none";
+            }
+            div.dataset.opened = 'false';
+            img.src = "{% static 'img/down_pl_ico.png' %}";
+        }
+    }
+    </script>
+
+
+<style>
+    .modal th{
+    color:black;
+    width: 60px;
+    padding: 20px;
+    }
+    .f{
+    width: 100%;
+    }
+.checkbox {
+	position: absolute;
+	z-index: -1;
+	opacity: 0;
+
+}
+.checkbox + label {
+	display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+.checkbox + label:before {
+	content: '';
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 0.25em;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  border-color: #0b76ef;
+  background-position: center center;
+  background-color: #0b76ef;
+  background-size: 50% 50%;
+  background-image: url("/static/img/checked.png");
+}
+
+.checkbox:checked+label::before {
+  background-image: none;
+  background-color: #FBFBFB;
+}
+.check_label{
+    float: left;
+    margin-left: 20px;
+    margin-right: 30px;
+}
+.track-img{
+    text-align:left;
+}
+.track-img img{
+width: 50px;
+height: 50px;
+}
+.track-author{
+color: #A1A1A1;
+font-size: 16px;
+font-weight: 500;
+line-heigt: 20px;
+}
+.song-name span{
+    width:10px;
+    margin-left: -10px;
+    margin-right: 25px;
+}
+.track-name{
+font-size: 16px;
+font-weight: 500;
+line-heigt: 20px;
+}
+.album-name{
+font-weight: 500;
+font-size: 16px;
+line-height: 20px;
+}
+.btn{
+border-radius: 4px;
+width: 220px;
+height: 50px;
+background-color: #3F8AE0;
+color: white;
+border: none;
+float: right;
+
+}
+.note{
+float: left;
+color: #4986CC;
+}
+.footer{
+margin-top: 23px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 118px;
+}
+</style>
+{% endblock %}
+

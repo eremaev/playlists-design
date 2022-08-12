@@ -1,0 +1,198 @@
+{% extends "base_auth.html" %}
+
+{% block content %}
+    {% load static %}
+    <div class="main">
+        <div class="logo">
+            <img src="{% static 'img/logo.png' %}" alt="Save Music">
+        </div>
+        <p class="head_text"><span class="blue_text">Создать аккаунт</span> savemusic.ru</p>
+        <form action="." method="post">
+            {% csrf_token %}
+            <div class="form-inner">
+                <div class="form-col">
+                    <label for="self_name">Имя(не обязательно):</label>
+                    <div class="form-part-row">
+                        <input type="text" name="self_name" id="self_name" oninput="is_valid();">
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="Верно">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <label for="username">Логин:</label>
+                    <div class="form-part-row">
+                        <input type="text" name="username" id="username" required oninput="is_valid();">
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="Верно">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <label for="email">Почта:</label>
+                    <div class="form-part-row">
+                        <input type="email" name="email" id="email"  oninput="is_valid();">
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="Верно">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-part-row form-part-row-confirm">
+                        <label for="code">Подтверждение почты:</label>
+                        <a onclick="send_code(this);">Отправить код</a>
+                    </div>
+                    <div class="form-part-row">
+                        <input type="text" name="code" id="code" autocomplete="off" required oninput="is_valid();">
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="Верно">
+                        </div>
+                    </div>
+                    <p id="mail_error"></p>
+                </div>
+                <div class="form-col">
+                    <label for="password">Пароль:</label>
+                    <div class="form-part-row">
+                        <input type="password" name="password" id="password" required oninput="is_valid();">
+                        <div class="password-control" onclick="return show_hide_password(this);" style="right: calc(18px + 24px + 15px);">
+                            <img src="{% static 'img/eye_crossed.png' %}" alt="Пароль">
+                        </div>
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <label for="password_confirm">Повторите пароль:</label>
+                    <div class="form-part-row">
+                        <input type="password" name="password_confirm" id="password_confirm" required oninput="is_valid();">
+                        <div class="password-control" onclick="return show_hide_password(this);" style="right: calc(18px + 24px + 15px);">
+                            <img src="{% static 'img/eye_crossed.png' %}" alt="Пароль">
+                        </div>
+                        <div class="form-part-row-img">
+                            <img src="{% static 'img/check_green.png' %}" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <p id="error-message"></p>
+            {% if error %}
+                <p id="error">{{ error }}</p>
+            {% endif %}
+            <input type="submit" class="green-button" id="send_form" value="Зарегистрироваться" disabled="disabled">
+        </form>
+        <div class="to-login-field">
+            <p>Если вы зарегестрированы, тогда нажмите <a href="{% url 'login' %}">здесь</a>.</p>
+        </div>
+    </div>
+
+    <!-- Show password -->
+    <script>
+        function show_hide_password(target){
+            let input = target.parentElement.children[0];
+            if (input.type === 'password') {
+                input.type = 'text';
+                target.children[0].src = '{% static 'img/eye.png' %}';
+            } else {
+                input.type = 'password';
+                target.children[0].src = '{% static 'img/eye_crossed.png' %}';
+            }
+        }
+    </script>
+
+    <!-- check if form is valid -->
+    <script>
+        function set_valid(el){
+            el.parentElement.getElementsByClassName('form-part-row-img')[0].querySelector('img').src = "{% static 'img/check_green.png' %}";
+            el.style.border = '1px solid #4986CC';
+        }
+        function set_invalid(el){
+            el.parentElement.getElementsByClassName('form-part-row-img')[0].querySelector('img').src = "{% static 'img/check_red.png' %}";
+            el.style.border = '1px solid #F40C0C';
+        }
+        function is_valid(){
+            let valid = true;
+            let fin_message = "";
+            let self_name = document.querySelector('#self_name').value;
+            if(self_name.match(/^[a-zA-Zа-яА-Я]*$/)){
+                set_valid(document.querySelector('#self_name'));
+            }else{
+                set_invalid(document.querySelector('#self_name'));
+                fin_message = "Имя должно содержать только буквы";
+                valid = false;
+            }
+            let username = document.querySelector('#username').value;
+            if(username.match(/^[a-zA-Z0-9_]{5,}$/)){
+                set_valid(document.querySelector('#username'));
+            }else{
+                set_invalid(document.querySelector('#username'));
+                if(fin_message === "")
+                    fin_message = "Логин должен содержать не менее 5 символов и состоять из латинских букв, цифр и знака подчеркивания";
+                valid = false;
+            }
+            let email = document.querySelector('#email').value;
+            if(email.match(/^[^@\n]+@[^@\n]+\.[^@\n]+$/)) {
+                set_valid(document.querySelector('#email'));
+            }else{
+                set_invalid(document.querySelector('#email'));
+                if(fin_message === "")
+                    fin_message = "Некорректный email";
+                valid = false;
+            }
+            let code = document.querySelector('#code').value;
+            if(code.match(/^[0-9]{6}$/)) {
+                set_valid(document.querySelector('#code'));
+            }else{
+                set_invalid(document.querySelector('#code'));
+                if(fin_message === "")
+                    fin_message = "Код должен содержать только цифры";
+                valid = false;
+            }
+            let password = document.querySelector('#password').value;
+            if(password.match(/^[a-zA-Z0-9!#$%&\'()*+,\-.\/:;<=>?@\[\\\]^_`{|}~ ]{8,}$/)) {
+                set_valid(document.querySelector('#password'));
+            }else{
+                set_invalid(document.querySelector('#password'));
+                if(fin_message === "")
+                    fin_message = "Пароль должен содержать не менее 8 символов";
+                valid = false;
+            }
+            let password_confirm = document.querySelector('#password_confirm').value;
+            if(password_confirm === password) {
+                set_valid(document.querySelector('#password_confirm'));
+            }else{
+                set_invalid(document.querySelector('#password_confirm'));
+                if(fin_message === "")
+                    fin_message = "Пароли не совпадают";
+                valid = false;
+            }
+            let send_form = document.querySelector('#send_form').value;
+
+            document.getElementById('error-message').innerHTML = fin_message;
+            document.getElementById('send_form').disabled = !valid;
+        }
+
+        window.onload = is_valid;
+    </script>
+
+    <!-- send code to mail -->
+    <script>
+        function send_code(e){
+            e.innerHTML = "Ожидайте...";
+            let email = $('#email').val();
+            let error_p = $('#mail_error');
+            $.ajax({
+                url: '{% url 'mail_confirm' %}',
+                data: {
+                    mail: email
+                },
+                success: function(data){
+                    console.log(data);
+                    error_p.html(data['status']);
+                    if(data['status'])
+                        e.innerHTML = "Отправить повторно";
+                }
+            });
+        }
+    </script>
+{% endblock %}
